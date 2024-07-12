@@ -7,46 +7,14 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 const apiKey = 'j86bwkwo-8hako-12C';
-const chatbotEndpoint = 'https://liaspark.chatbotcommunity.ltd/@lanceajiro/api/jea';
+const chatbotEndpoint = 'https://liaspark.chatbotcommunity.ltd/@lanceajiro/api/jea'; // Update with actual endpoint
 
 app.use(bodyParser.json());
 
-// Schedule greetings using node-cron (every morning at 9 AM)
-cron.schedule('0 9 * * *', async () => {
-    try {
-        const greeting = generateGreeting();
-        const response = await axios.get(chatbotEndpoint, {
-            params: {
-                key: apiKey,
-                query: greeting
-            }
-        });
+let conversationHistory = {}; // Object to store conversation history by user ID
 
-        const botMessage = translateToTagalog(response.data.message);
-        console.log(`Scheduled greeting: ${botMessage}`);
-        // Optionally, you can send this message to a user via a messaging service like Twilio or Telegram
-    } catch (error) {
-        console.error('Error fetching response from chatbot API:', error.message);
-    }
-});
-
-// Function to generate random greetings
-function generateGreeting() {
-    const greetings = [
-        "Hello who are you?",
-        "Hi, how are you?",
-        "Good morning!",
-        "Hey there!"
-    ];
-    const randomIndex = Math.floor(Math.random() * greetings.length);
-    return greetings[randomIndex];
-}
-
-// Function to translate responses to Tagalog
+// Function to translate responses to Tagalog (sample translation)
 function translateToTagalog(message) {
-    // Implement your translation logic here
-    // For demonstration purposes, let's assume a simple translation
-    // Replace this with your actual translation implementation
     switch (message.toLowerCase()) {
         case "hello, who are you?":
             return "Kamusta, sino ka?";
@@ -57,7 +25,7 @@ function translateToTagalog(message) {
         case "hey there!":
             return "Kamusta!";
         default:
-            return message; // Return original message if no translation is specified
+            return message;
     }
 }
 
@@ -66,6 +34,7 @@ app.get('/api/ask=:question', async (req, res) => {
     const { question } = req.params;
 
     try {
+        // Simulate conversation with external API
         const response = await axios.get(chatbotEndpoint, {
             params: {
                 key: apiKey,
