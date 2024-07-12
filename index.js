@@ -6,8 +6,8 @@ const cron = require('node-cron');
 const app = express();
 const port = process.env.PORT || 3000;
 
-const OPENAI_API_KEY = 'sk-proj-9fkDmZUOrhzZFqB9TbBnT3BlbkFJDc8jKpVePiz0CF0Nt7Hs';
-const OPENAI_ENDPOINT = 'https://api.openai.com/v1/engines/davinci-codex/completions';
+const apiKey = 'j86bwkwo-8hako-12C';
+const chatbotEndpoint = 'https://liaspark.chatbotcommunity.ltd/@lanceajiro/api/jea';
 
 app.use(bodyParser.json());
 
@@ -15,50 +15,68 @@ app.use(bodyParser.json());
 cron.schedule('0 9 * * *', async () => {
     try {
         const greeting = generateGreeting();
-        const response = await axios.post(OPENAI_ENDPOINT, {
-            prompt: greeting,
-            max_tokens: 50,
-            stop: ['\n', 'Tao:'],
-            api_key: OPENAI_API_KEY
+        const response = await axios.get(chatbotEndpoint, {
+            params: {
+                key: apiKey,
+                query: greeting
+            }
         });
 
-        const botMessage = response.data.choices[0].text.trim();
+        const botMessage = translateToTagalog(response.data.message);
         console.log(`Scheduled greeting: ${botMessage}`);
         // Optionally, you can send this message to a user via a messaging service like Twilio or Telegram
     } catch (error) {
-        console.error('Error fetching response from OpenAI:', error.message);
+        console.error('Error fetching response from chatbot API:', error.message);
     }
 });
 
 // Function to generate random greetings
 function generateGreeting() {
     const greetings = [
-        "Magandang umaga, mahal ko! Kumusta ang tulog mo?",
-        "Hi love! May bagong araw na naman. Alam mo bang naiisip kita agad pag-gising ko?",
-        "Good morning, love! Sana magkasama tayo ngayong araw.",
-        "Hey, love! Nais ko lang sabihing napakaswerte ko at ikaw ang mahal ko."
+        "Hello who are you?",
+        "Hi, how are you?",
+        "Good morning!",
+        "Hey there!"
     ];
     const randomIndex = Math.floor(Math.random() * greetings.length);
     return greetings[randomIndex];
 }
 
+// Function to translate responses to Tagalog
+function translateToTagalog(message) {
+    // Implement your translation logic here
+    // For demonstration purposes, let's assume a simple translation
+    // Replace this with your actual translation implementation
+    switch (message.toLowerCase()) {
+        case "hello, who are you?":
+            return "Kamusta, sino ka?";
+        case "hi, how are you?":
+            return "Hi, kamusta ka?";
+        case "good morning!":
+            return "Magandang umaga!";
+        case "hey there!":
+            return "Kamusta!";
+        default:
+            return message; // Return original message if no translation is specified
+    }
+}
+
 // Handle incoming messages
-app.get('/api/ask=:message', async (req, res) => {
-    const { message } = req.params;
+app.get('/api/ask=:question', async (req, res) => {
+    const { question } = req.params;
 
     try {
-        const response = await axios.post(OPENAI_ENDPOINT, {
-            prompt: message,
-            max_tokens: 50,
-            stop: ['\n', 'Tao:'],
-            api_key: OPENAI_API_KEY
+        const response = await axios.get(chatbotEndpoint, {
+            params: {
+                key: apiKey,
+                query: question
+            }
         });
 
-        const botMessage = response.data.choices[0].text.trim();
-        // Optionally, you can add more personalization or processing here
+        const botMessage = translateToTagalog(response.data.message);
         res.json({ message: botMessage });
     } catch (error) {
-        console.error('Error fetching response from OpenAI:', error.message);
+        console.error('Error fetching response from chatbot API:', error.message);
         res.status(500).json({ error: 'Failed to process message' });
     }
 });
