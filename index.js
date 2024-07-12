@@ -43,8 +43,8 @@ function generateGreeting() {
 }
 
 // Handle incoming messages
-app.post('/api/message', async (req, res) => {
-    const { message } = req.body;
+app.get('/api/ask=:message', async (req, res) => {
+    const { message } = req.params;
 
     try {
         const response = await axios.post(OPENAI_ENDPOINT, {
@@ -55,6 +55,7 @@ app.post('/api/message', async (req, res) => {
         });
 
         const botMessage = response.data.choices[0].text.trim();
+        // Optionally, you can add more personalization or processing here
         res.json({ message: botMessage });
     } catch (error) {
         console.error('Error fetching response from OpenAI:', error.message);
@@ -62,6 +63,12 @@ app.post('/api/message', async (req, res) => {
     }
 });
 
+// Handle all other requests (404 - Not Found)
+app.use((req, res) => {
+    res.status(404).json({ error: 'Endpoint not found' });
+});
+
+// Start the server
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });
